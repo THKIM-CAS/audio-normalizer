@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT" }
 authors = [
-    { name = "Your Name", email = "your.email@example.com" }
+    { name = "Tae-Hwan Kim", email = "noprely@noreply.noreply" }
 ]
 keywords = ["pptx", "powerpoint", "video", "mp4", "audio", "normalization", "lufs", "loudness", "denoise"]
 classifiers = [
@@ -36,9 +36,9 @@ tune-pptx-sound = "cli:main"
 tune-video-sound = "video_cli:main"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/audio-normalizer-toolkit"
-Repository = "https://github.com/yourusername/audio-normalizer-toolkit"
-Issues = "https://github.com/yourusername/audio-normalizer-toolkit/issues"
+Homepage = "https://github.com/THKIM-CAS/audio-normalizer"
+Repository = "https://github.com/THKIM-CAS/audio-normalizer"
+Issues = "https://github.com/THKIM-CAS/audio-normalizer/issues"
 
 [build-system]
 requires = ["hatchling"]
