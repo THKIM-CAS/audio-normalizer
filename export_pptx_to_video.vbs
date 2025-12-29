@@ -194,57 +194,85 @@ For Each file In folder.Files
                 ' Give it a moment to start
                 WScript.Sleep 2000
 
-                Dim waitCount
+                Dim waitCount, checkCount
+                Dim lastFileSize, currentFileSize
+                Dim stableCount
                 waitCount = 0
+                checkCount = 0
+                lastFileSize = 0
+                stableCount = 0
                 Dim currentStatus
 
-                ' Wait while video is being created (status 0 or 1)
+                ' Wait while video is being created
+                ' Strategy: Monitor both status AND file size changes
                 Do
                     currentStatus = presentation.CreateVideoStatus
 
-                    If currentStatus = 0 Or currentStatus = 1 Then
-                        ' Still processing
-                        waitCount = waitCount + 1
-                        If waitCount Mod 5 = 0 Then
-                            WScript.Echo "    Still processing... (" & waitCount & " seconds elapsed)"
+                    ' Check if video file exists and its size
+                    If fso.FileExists(videoPath) Then
+                        currentFileSize = fso.GetFile(videoPath).Size
+
+                        ' If file size hasn't changed in 10 checks (10 seconds), consider it complete
+                        If currentFileSize = lastFileSize And currentFileSize > 0 Then
+                            stableCount = stableCount + 1
+                            If stableCount >= 10 Then
+                                WScript.Echo "    Video file size stable, export appears complete"
+                                Exit Do
+                            End If
+                        Else
+                            stableCount = 0 ' Reset if size changed
                         End If
-                        WScript.Sleep 1000 ' Wait 1 second
-                    Else
-                        ' Status changed to complete or failed
+
+                        lastFileSize = currentFileSize
+                    End If
+
+                    ' Also check status
+                    If currentStatus = 2 Then
+                        ' Complete status
+                        WScript.Echo "    Status indicates completion"
+                        Exit Do
+                    ElseIf currentStatus = 3 Then
+                        ' Failed status
+                        WScript.Echo "    Status indicates failure"
                         Exit Do
                     End If
 
-                    ' Safety timeout: 30 minutes maximum
-                    If waitCount > 1800 Then
-                        WScript.Echo "    WARNING: Timeout after 30 minutes"
+                    ' Progress indicator
+                    waitCount = waitCount + 1
+                    If waitCount Mod 10 = 0 Then
+                        If fso.FileExists(videoPath) Then
+                            WScript.Echo "    Still processing... (" & waitCount & " seconds, file size: " & FormatBytes(currentFileSize) & ")"
+                        Else
+                            WScript.Echo "    Still processing... (" & waitCount & " seconds)"
+                        End If
+                    End If
+
+                    WScript.Sleep 1000 ' Wait 1 second
+
+                    ' Safety timeout: 2 hours maximum (some large presentations take a long time)
+                    If waitCount > 7200 Then
+                        WScript.Echo "    WARNING: Timeout after 2 hours"
                         Exit Do
                     End If
                 Loop
 
-                ' Check final status
+                ' Check final result
                 currentStatus = presentation.CreateVideoStatus
 
-                If currentStatus = 2 Then
-                    ' Verify the file was actually created
-                    If fso.FileExists(videoPath) Then
-                        WScript.Echo "    SUCCESS: Video created successfully (" & waitCount & " seconds)"
+                If fso.FileExists(videoPath) Then
+                    Dim finalFileSize
+                    finalFileSize = fso.GetFile(videoPath).Size
+
+                    If finalFileSize > 0 Then
+                        WScript.Echo "    SUCCESS: Video created successfully (" & waitCount & " seconds, " & FormatBytes(finalFileSize) & ")"
                         processedFiles = processedFiles + 1
                     Else
-                        WScript.Echo "    ERROR: Status shows success but video file not found"
+                        WScript.Echo "    ERROR: Video file exists but is empty"
                         failedFiles = failedFiles + 1
                     End If
-                ElseIf currentStatus = 3 Then
-                    WScript.Echo "    ERROR: Video creation failed (status 3)"
-                    failedFiles = failedFiles + 1
                 Else
-                    WScript.Echo "    WARNING: Unknown final status - " & currentStatus
-                    ' Check if file exists anyway
-                    If fso.FileExists(videoPath) Then
-                        WScript.Echo "    Note: Video file found despite unknown status"
-                        processedFiles = processedFiles + 1
-                    Else
-                        failedFiles = failedFiles + 1
-                    End If
+                    WScript.Echo "    ERROR: Video file not found (Status: " & currentStatus & ")"
+                    failedFiles = failedFiles + 1
                 End If
             End If
 
@@ -294,4 +322,20 @@ Function GetQualityName(quality)
         Case Else
             GetQualityName = "HD 720p (30fps)"
     End Select
+End Function
+
+' Function to format bytes into human-readable format
+Function FormatBytes(bytes)
+    Dim size
+    size = CDbl(bytes)
+
+    If size < 1024 Then
+        FormatBytes = size & " B"
+    ElseIf size < 1048576 Then
+        FormatBytes = Round(size / 1024, 2) & " KB"
+    ElseIf size < 1073741824 Then
+        FormatBytes = Round(size / 1048576, 2) & " MB"
+    Else
+        FormatBytes = Round(size / 1073741824, 2) & " GB"
+    End If
 End Function
