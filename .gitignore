@@ -155,3 +155,6 @@ test_*.pptx
 tmp/
 temp/
 *.tmp
+
+# Claude Code
+.claude
