@@ -1,0 +1,54 @@
+[project]
+name = "pptx-sound-normalizer"
+version = "0.1.0"
+description = "Normalize audio volume across PowerPoint slides using LUFS standard"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [
+    { name = "Your Name", email = "your.email@example.com" }
+]
+keywords = ["pptx", "powerpoint", "audio", "normalization", "lufs", "loudness"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Multimedia :: Sound/Audio",
+    "Topic :: Office/Business",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "pyloudnorm>=0.1.0",
+    "soundfile>=0.12.0",
+    "numpy>=1.20.0",
+    "ffmpeg-python>=0.2.0",
+    "scipy>=1.7.0",
+    "noisereduce>=3.0.0",
+]
+
+[project.scripts]
+tune-sound = "cli:main"
+
+[project.urls]
+Homepage = "https://github.com/yourusername/pptx-sound-normalizer"
+Repository = "https://github.com/yourusername/pptx-sound-normalizer"
+Issues = "https://github.com/yourusername/pptx-sound-normalizer/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["."]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+]
