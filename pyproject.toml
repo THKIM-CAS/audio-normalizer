@@ -1,14 +1,14 @@
 [project]
-name = "pptx-sound-normalizer"
+name = "audio-normalizer-toolkit"
 version = "0.1.0"
-description = "Normalize audio volume across PowerPoint slides using LUFS standard"
+description = "Normalize and denoise audio in PowerPoint presentations (PPTX) and videos (MP4) using LUFS standard"
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT" }
 authors = [
     { name = "Your Name", email = "your.email@example.com" }
 ]
-keywords = ["pptx", "powerpoint", "audio", "normalization", "lufs", "loudness"]
+keywords = ["pptx", "powerpoint", "video", "mp4", "audio", "normalization", "lufs", "loudness", "denoise"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: End Users/Desktop",
@@ -32,12 +32,13 @@ dependencies = [
 ]
 
 [project.scripts]
-tune-sound = "cli:main"
+tune-pptx-sound = "cli:main"
+tune-video-sound = "video_cli:main"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/pptx-sound-normalizer"
-Repository = "https://github.com/yourusername/pptx-sound-normalizer"
-Issues = "https://github.com/yourusername/pptx-sound-normalizer/issues"
+Homepage = "https://github.com/yourusername/audio-normalizer-toolkit"
+Repository = "https://github.com/yourusername/audio-normalizer-toolkit"
+Issues = "https://github.com/yourusername/audio-normalizer-toolkit/issues"
 
 [build-system]
 requires = ["hatchling"]

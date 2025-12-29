@@ -4,6 +4,13 @@ __version__ = "0.1.0"
 
 from audio_normalizer import normalize_audio_file, normalize_audio_files, AudioNormalizationStats
 from pptx_handler import extract_pptx, reconstruct_pptx, find_audio_files, get_audio_format
+from video_handler import (
+    extract_audio_from_video,
+    replace_audio_in_video,
+    validate_video_file,
+    find_video_files,
+    get_video_info,
+)
 from utils import (
     TempDirectory,
     setup_logging,
@@ -22,6 +29,11 @@ __all__ = [
     "reconstruct_pptx",
     "find_audio_files",
     "get_audio_format",
+    "extract_audio_from_video",
+    "replace_audio_in_video",
+    "validate_video_file",
+    "find_video_files",
+    "get_video_info",
     "TempDirectory",
     "setup_logging",
     "check_ffmpeg_installed",

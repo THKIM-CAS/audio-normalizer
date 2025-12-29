@@ -1,18 +1,37 @@
-# PPTX Narration Sound Tuner
+# Audio Normalizer Toolkit
 
-A Python command-line tool that tunes audio volume and removes noise from PowerPoint narrations using the LUFS (Loudness Units relative to Full Scale) standard.
+A Python command-line toolkit for normalizing and denoising audio in both PowerPoint presentations (PPTX) and video files (MP4) using the LUFS (Loudness Units relative to Full Scale) standard.
 
 > **Note:** This is a modern uv-based Python project. All dependencies are managed with [uv](https://github.com/astral-sh/uv).
 
-## Features
+## What's Included
+
+This toolkit provides three complementary tools:
+
+1. **tune-pptx-sound** - PPTX audio normalizer and denoiser
+2. **tune-video-sound** - Video (MP4) audio normalizer and denoiser
+3. **export_pptx_to_video.vbs** - Windows batch script to export PPTX files to video
+
+## Common Features
+
+Both `tune-pptx-sound` and `tune-video-sound` share these core features:
 
 - **LUFS Normalization**: Uses EBU R128 standard for consistent perceived loudness
 - **Audio Denoising**: Optional noise reduction to remove background HVAC, room tone, and ambient noise
-- **Format Support**: Handles WAV, MP3, M4A, WMA, AAC, FLAC, and OGG audio formats
-- **Non-Destructive**: Creates a new PPTX file, preserving the original
-- **Batch Processing**: Process all PPTX files in a directory at once
+- **Batch Processing**: Process all files in a directory at once
 - **Automatic Conversion**: Seamlessly handles format conversion via FFmpeg
+- **Non-Destructive**: Creates new output files, preserving originals
 - **Detailed Logging**: Provides clear feedback on normalization progress and results
+
+### tune-pptx-sound Specific Features
+- Handles WAV, MP3, M4A, WMA, AAC, FLAC, and OGG audio formats embedded in PPTX
+- Preserves all PPTX structure and relationships
+- Process all narrations across multiple slides at once
+
+### tune-video-sound Specific Features
+- Supports MP4 video files with h264/h265 codecs
+- Video stream copied without re-encoding (fast processing)
+- Audio extracted, processed, and replaced seamlessly
 
 ## Why LUFS?
 
@@ -79,10 +98,10 @@ cd pptx_sound_normalizer
 uv sync
 
 # This creates a virtual environment and installs all dependencies
-# The tune-sound command will be available in the virtual environment
+# The tune-pptx-sound and tune-video-sound commands will be available
 ```
 
-To run the tool after `uv sync`:
+To run the tools after `uv sync`:
 
 ```bash
 # Activate the virtual environment
@@ -90,14 +109,16 @@ source .venv/bin/activate  # macOS/Linux
 # or
 .venv\Scripts\activate     # Windows
 
-# Then use the command
-tune-sound input.pptx output.pptx
+# Then use the commands
+tune-pptx-sound input.pptx output.pptx
+tune-video-sound input.mp4 output.mp4
 ```
 
 Alternatively, run directly with uv:
 
 ```bash
-uv run tune-sound input.pptx output.pptx
+uv run tune-pptx-sound input.pptx output.pptx
+uv run tune-video-sound input.mp4 output.mp4
 ```
 
 ### 3. Install FFmpeg
@@ -126,19 +147,25 @@ ffmpeg -version
 
 ## Usage
 
-After running `uv sync`, you can use the tool in several ways:
+After running `uv sync`, both `tune-pptx-sound` and `tune-video-sound` commands are available.
+
+---
+
+## tune-pptx-sound: PPTX Audio Normalizer
+
+Normalize and denoise audio narrations embedded in PowerPoint presentations.
 
 ### Single File Mode
 
 With uv (recommended):
 ```bash
-uv run tune-sound input.pptx output.pptx
+uv run tune-pptx-sound input.pptx output.pptx
 ```
 
 Or activate the virtual environment first:
 ```bash
 source .venv/bin/activate  # macOS/Linux
-tune-sound input.pptx output.pptx
+tune-pptx-sound input.pptx output.pptx
 ```
 
 This normalizes all audio in `input.pptx` to -16 LUFS and saves to `output.pptx`.
@@ -148,7 +175,7 @@ This normalizes all audio in `input.pptx` to -16 LUFS and saves to `output.pptx`
 Process all PPTX files in a directory:
 
 ```bash
-uv run tune-sound --input-dir ./input --output-dir ./output
+uv run tune-pptx-sound --input-dir ./input --output-dir ./output
 ```
 
 This will:
@@ -161,34 +188,34 @@ This will:
 
 Single file:
 ```bash
-uv run tune-sound input.pptx output.pptx --target-lufs -14
+uv run tune-pptx-sound input.pptx output.pptx --target-lufs -14
 ```
 
 Batch mode:
 ```bash
-uv run tune-sound --input-dir ./input --output-dir ./output --target-lufs -14
+uv run tune-pptx-sound --input-dir ./input --output-dir ./output --target-lufs -14
 ```
 
 ### Denoising Examples
 
 Apply noise reduction with default strength:
 ```bash
-uv run tune-sound input.pptx output.pptx --denoise
+uv run tune-pptx-sound input.pptx output.pptx --denoise
 ```
 
 Apply noise reduction with custom strength:
 ```bash
-uv run tune-sound input.pptx output.pptx --denoise --denoise-strength 0.7
+uv run tune-pptx-sound input.pptx output.pptx --denoise --denoise-strength 0.7
 ```
 
 Combine denoising with custom LUFS target:
 ```bash
-uv run tune-sound input.pptx output.pptx --denoise --target-lufs -14
+uv run tune-pptx-sound input.pptx output.pptx --denoise --target-lufs -14
 ```
 
 Batch processing with denoising:
 ```bash
-uv run tune-sound \
+uv run tune-pptx-sound \
   --input-dir ./input \
   --output-dir ./output \
   --denoise \
@@ -198,7 +225,7 @@ uv run tune-sound \
 ### Verbose Output
 
 ```bash
-uv run tune-sound input.pptx output.pptx --verbose
+uv run tune-pptx-sound input.pptx output.pptx --verbose
 ```
 
 Shows detailed processing information including:
@@ -210,7 +237,7 @@ Shows detailed processing information including:
 ### Force Overwrite
 
 ```bash
-uv run tune-sound input.pptx output.pptx --force
+uv run tune-pptx-sound input.pptx output.pptx --force
 ```
 
 Overwrites the output file(s) without prompting if they already exist. Works in both single file and batch modes.
@@ -219,7 +246,7 @@ Overwrites the output file(s) without prompting if they already exist. Works in 
 
 Single file with all options:
 ```bash
-uv run tune-sound \
+uv run tune-pptx-sound \
   presentation.pptx \
   presentation_normalized.pptx \
   --target-lufs -16 \
@@ -229,7 +256,7 @@ uv run tune-sound \
 
 Batch processing with options:
 ```bash
-uv run tune-sound \
+uv run tune-pptx-sound \
   --input-dir ./presentations \
   --output-dir ./normalized \
   --target-lufs -14 \
@@ -258,7 +285,7 @@ with TempDirectory() as temp_dir:
         print(f"{stat.filename}: {stat.original_lufs:.1f} → {stat.target_lufs:.1f} LUFS")
 ```
 
-## Command-Line Options
+### tune-pptx-sound Command-Line Options
 
 ```
 positional arguments:
@@ -283,7 +310,7 @@ optional arguments:
 
 These modes are mutually exclusive - you cannot mix them.
 
-## How It Works
+### How tune-pptx-sound Works
 
 1. **Extraction**: The PPTX file (which is a ZIP archive) is extracted to a temporary directory
 2. **Discovery**: Audio files are located in the `ppt/media/` directory
@@ -293,7 +320,7 @@ These modes are mutually exclusive - you cannot mix them.
 6. **Reconstruction**: The modified PPTX is reassembled with normalized audio
 7. **Output**: A new PPTX file is created with consistent audio levels
 
-## Supported Audio Formats
+### Supported Audio Formats in PPTX
 
 | Format | Extension | Notes |
 |--------|-----------|-------|
@@ -307,9 +334,9 @@ These modes are mutually exclusive - you cannot mix them.
 
 **Note:** Compressed formats (MP3, M4A, WMA, AAC) undergo conversion to WAV for processing, then back to the original format. Some quality loss may occur with lossy formats.
 
-## Output Examples
+### tune-pptx-sound Output Examples
 
-### Successful Single File Normalization
+#### Successful Single File Normalization
 
 ```
 ============================================================
@@ -352,7 +379,7 @@ Success! Output written to: presentation_normalized.pptx
 ============================================================
 ```
 
-### Successful Batch Directory Processing
+#### Successful Batch Directory Processing
 
 ```
 ============================================================
@@ -396,9 +423,9 @@ Successfully processed: 3
 
 ```
 
-## Troubleshooting
+### Troubleshooting tune-pptx-sound
 
-### FFmpeg Not Found
+#### FFmpeg Not Found
 
 **Error:**
 ```
@@ -408,7 +435,7 @@ ERROR: FFmpeg is not installed or not accessible.
 **Solution:**
 Install FFmpeg following the instructions in the Installation section above.
 
-### No Audio Files Found
+#### No Audio Files Found
 
 **Warning:**
 ```
@@ -418,7 +445,7 @@ WARNING: No audio files found in PPTX.
 **Explanation:**
 The PPTX file doesn't contain any slide narrations or audio files. A copy of the original will be created.
 
-### Audio Too Short
+#### Audio Too Short
 
 **Warning:**
 ```
@@ -428,7 +455,7 @@ WARNING: Audio too short (0.2s) for LUFS measurement, skipping media1.wav
 **Explanation:**
 LUFS measurement requires at least ~400ms of audio. Very short clips are skipped.
 
-### Invalid PPTX File
+#### Invalid PPTX File
 
 **Error:**
 ```
@@ -438,7 +465,7 @@ ERROR: Not a valid PPTX file (not a ZIP archive): file.pptx
 **Solution:**
 Ensure the file is a valid PowerPoint PPTX file, not a PPT (older format) or corrupted file.
 
-### Permission Denied
+#### Permission Denied
 
 **Error:**
 ```
@@ -450,6 +477,308 @@ ERROR: [Errno 13] Permission denied: 'output.pptx'
 - Close the output file if it's open in PowerPoint
 - Use a different output location
 
+---
+
+## tune-video-sound: Video Audio Normalizer
+
+Normalize and denoise audio tracks in MP4 video files. The video stream is copied without re-encoding for fast processing.
+
+### Single File Mode
+
+With uv (recommended):
+```bash
+uv run tune-video-sound input.mp4 output.mp4
+```
+
+Or activate the virtual environment first:
+```bash
+source .venv/bin/activate  # macOS/Linux
+tune-video-sound input.mp4 output.mp4
+```
+
+This extracts audio from `input.mp4`, normalizes it to -16 LUFS, and saves to `output.mp4`.
+
+### Batch Directory Mode
+
+Process all MP4 files in a directory:
+
+```bash
+uv run tune-video-sound --input-dir ./videos --output-dir ./processed
+```
+
+This will:
+- Find all `.mp4` files in the input directory
+- Extract and normalize the audio in each file
+- Save the processed files to the output directory with the same filenames
+- Create the output directory if it doesn't exist
+
+### Custom Target LUFS
+
+Single file:
+```bash
+uv run tune-video-sound input.mp4 output.mp4 --target-lufs -14
+```
+
+Batch mode:
+```bash
+uv run tune-video-sound --input-dir ./videos --output-dir ./processed --target-lufs -14
+```
+
+### Denoising Examples
+
+Apply noise reduction with default strength:
+```bash
+uv run tune-video-sound input.mp4 output.mp4 --denoise
+```
+
+Apply noise reduction with custom strength:
+```bash
+uv run tune-video-sound input.mp4 output.mp4 --denoise --denoise-strength 0.7
+```
+
+Combine denoising with custom LUFS target:
+```bash
+uv run tune-video-sound input.mp4 output.mp4 --denoise --target-lufs -14
+```
+
+Batch processing with denoising:
+```bash
+uv run tune-video-sound \
+  --input-dir ./videos \
+  --output-dir ./processed \
+  --denoise \
+  --denoise-strength 0.6
+```
+
+### Verbose Output
+
+```bash
+uv run tune-video-sound input.mp4 output.mp4 --verbose
+```
+
+Shows detailed processing information including:
+- Audio extraction details
+- Sample rates and durations
+- Measured loudness levels
+- Applied gain adjustments
+
+### Force Overwrite
+
+```bash
+uv run tune-video-sound input.mp4 output.mp4 --force
+```
+
+Overwrites the output file(s) without prompting if they already exist. Works in both single file and batch modes.
+
+### Complete Examples
+
+Single file with all options:
+```bash
+uv run tune-video-sound \
+  lecture.mp4 \
+  lecture_normalized.mp4 \
+  --target-lufs -16 \
+  --denoise \
+  --denoise-strength 0.5 \
+  --verbose \
+  --force
+```
+
+Batch processing with options:
+```bash
+uv run tune-video-sound \
+  --input-dir ./recordings \
+  --output-dir ./normalized \
+  --target-lufs -14 \
+  --denoise \
+  --force
+```
+
+### tune-video-sound Command-Line Options
+
+```
+positional arguments:
+  input                 Input MP4 file (single file mode)
+  output                Output MP4 file (single file mode)
+
+optional arguments:
+  -h, --help            Show help message and exit
+  --input-dir DIR       Input directory containing MP4 files (batch mode)
+  --output-dir DIR      Output directory for processed videos (batch mode)
+  --target-lufs FLOAT   Target loudness in LUFS (default: -16.0)
+  --denoise             Apply noise reduction before normalization
+  --denoise-strength FLOAT  Denoising strength: 0.0 (none) to 1.0 (maximum) (default: 0.5)
+  -v, --verbose         Enable verbose logging
+  -f, --force           Overwrite output file(s) without prompting
+```
+
+### Usage Modes
+
+**Single File Mode**: Provide `input` and `output` positional arguments
+**Batch Mode**: Use `--input-dir` and `--output-dir` options together
+
+These modes are mutually exclusive - you cannot mix them.
+
+### How tune-video-sound Works
+
+1. **Validation**: Checks that the video file exists and contains both video and audio streams
+2. **Audio Extraction**: Extracts audio track to temporary WAV file using FFmpeg (48kHz stereo)
+3. **Denoising** (optional): Background noise is removed using spectral gating
+4. **Measurement**: Audio loudness is measured using the EBU R128 algorithm
+5. **Normalization**: Audio is adjusted to match the target LUFS level
+6. **Audio Replacement**: Normalized audio replaces original track (video stream copied, no re-encoding)
+7. **Output**: A new MP4 file is created with normalized audio and original video
+
+### Supported Video Formats
+
+| Format | Extension | Video Codec | Notes |
+|--------|-----------|-------------|-------|
+| MP4    | `.mp4`    | h264, h265  | Video copied without re-encoding; audio replaced with AAC 192kbps |
+
+**Note:** The video stream is copied directly (no re-encoding) for fast processing. Only the audio track is processed.
+
+### tune-video-sound Output Examples
+
+#### Successful Single File Processing
+
+```
+============================================================
+Video Audio Normalizer
+============================================================
+FFmpeg: Available
+Target: -16.0 LUFS
+Denoise: Enabled (strength: 0.50)
+
+Input:  lecture_recording.mp4
+Output: lecture_normalized.mp4
+
+INFO: Extracting audio from: lecture_recording.mp4
+
+INFO: Processing audio...
+INFO: Measured loudness: -22.3 LUFS
+INFO: Normalizing to -16.0 LUFS (gain: +6.3 dB)
+INFO: Audio normalization complete
+
+INFO: Replacing audio in: lecture_recording.mp4
+INFO: Success! Output written to: lecture_normalized.mp4
+
+------------------------------------------------------------
+Normalization: -22.3 LUFS → -16.0 LUFS (+6.3 dB)
+------------------------------------------------------------
+
+============================================================
+Processing Complete
+============================================================
+```
+
+#### Successful Batch Directory Processing
+
+```
+============================================================
+Video Audio Normalizer
+Batch Directory Mode
+============================================================
+FFmpeg: Available
+Target: -16.0 LUFS
+Denoise: Disabled
+
+Input Directory:  ./recordings
+Output Directory: ./processed
+Found 3 video file(s) to process
+
+============================================================
+Processing file 1/3: lecture1.mp4
+============================================================
+INFO: Extracting audio from: lecture1.mp4
+INFO: Measured loudness: -20.1 LUFS
+INFO: Normalizing to -16.0 LUFS (gain: +4.1 dB)
+INFO: Success! Output written to: processed/lecture1.mp4
+
+============================================================
+Processing file 2/3: lecture2.mp4
+============================================================
+...
+
+============================================================
+Processing file 3/3: lecture3.mp4
+============================================================
+...
+
+============================================================
+Batch Processing Complete
+============================================================
+Total files:            3
+Successfully processed: 3
+```
+
+### Troubleshooting tune-video-sound
+
+#### FFmpeg Not Found
+
+**Error:**
+```
+ERROR: FFmpeg is not installed or not accessible.
+```
+
+**Solution:**
+Install FFmpeg following the instructions in the Installation section above. FFmpeg is required for video/audio extraction and replacement.
+
+#### No Audio Stream
+
+**Error:**
+```
+ERROR: No audio stream found in: video.mp4
+```
+
+**Explanation:**
+The video file doesn't contain an audio track. tune-video requires videos with audio.
+
+**Solution:**
+- Verify the video file has audio using a media player
+- Check if the audio track was accidentally removed during editing
+- Use a different video file
+
+#### No Video Stream
+
+**Error:**
+```
+ERROR: No video stream found in: file.mp4
+```
+
+**Explanation:**
+The file doesn't contain a video stream (might be audio-only).
+
+**Solution:**
+- Verify this is a valid video file
+- For audio-only files, consider using a different tool or converting to audio format first
+
+#### Unsupported Format
+
+**Error:**
+```
+ERROR: Unsupported format: .avi (only .mp4 supported)
+```
+
+**Solution:**
+Currently only MP4 format is supported. Convert your video to MP4 format first using FFmpeg:
+```bash
+ffmpeg -i input.avi -c:v libx264 -c:a aac output.mp4
+```
+
+#### Permission Denied
+
+**Error:**
+```
+ERROR: [Errno 13] Permission denied: 'output.mp4'
+```
+
+**Solution:**
+- Ensure you have write permissions in the output directory
+- Close the output file if it's open in a video player
+- Use a different output location
+
+---
+
 ## Technical Details
 
 ### Project Structure
@@ -457,24 +786,35 @@ ERROR: [Errno 13] Permission denied: 'output.pptx'
 This is a modern Python package using `uv` for dependency management with a flat structure:
 
 ```
-pptx_sound_normalizer/
+audio-normalizer-toolkit/
 ├── pyproject.toml          # Project metadata and dependencies
 ├── README.md               # Documentation
 ├── __init__.py             # Package exports
-├── cli.py                  # CLI entry point
+├── cli.py                  # tune-pptx-sound CLI entry point
+├── video_cli.py            # tune-video-sound CLI entry point
 ├── audio_normalizer.py     # LUFS normalization engine
 ├── pptx_handler.py         # PPTX extraction/reconstruction
-└── utils.py                # Helper utilities
+├── video_handler.py        # Video audio extraction/replacement
+├── utils.py                # Helper utilities
+├── export_pptx_to_video.vbs # Windows PPTX to video export
+└── run_export.bat          # Windows batch wrapper
 ```
 
 ### Architecture
 
-The tool is built with a modular architecture:
+The toolkit is built with a modular architecture shared between both tools:
 
-- **cli.py**: Command-line interface and orchestration
+**Shared modules:**
+- **audio_normalizer.py**: LUFS measurement and normalization (used by both tools)
+- **utils.py**: Helper functions and utilities (used by both tools)
+
+**tune-pptx-sound specific:**
+- **cli.py**: Command-line interface for PPTX processing
 - **pptx_handler.py**: PPTX extraction and reconstruction
-- **audio_normalizer.py**: LUFS measurement and normalization
-- **utils.py**: Helper functions and utilities
+
+**tune-video-sound specific:**
+- **video_cli.py**: Command-line interface for video processing
+- **video_handler.py**: Video audio extraction and replacement via FFmpeg
 
 ### LUFS Normalization Algorithm
 
@@ -496,14 +836,29 @@ The tool uses `pyloudnorm`, a Python implementation of ITU-R BS.1770-4:
 
 ## Limitations
 
+### tune-pptx-sound Limitations
 1. **Lossy Format Quality**: Converting MP3/M4A/WMA to WAV and back may introduce minor quality degradation
 2. **Minimum Duration**: Audio clips shorter than ~400ms cannot be measured with LUFS
 3. **Silent Audio**: Completely silent audio files are skipped
 4. **File Size**: Very large PPTX files require sufficient disk space for temporary extraction
 
-## PowerPoint to Video Export (Windows)
+### tune-video-sound Limitations
+1. **Format Support**: Currently only MP4 files are supported (h264/h265 codecs)
+2. **Audio Re-encoding**: Audio is re-encoded to AAC 192kbps (minor quality change possible)
+3. **Minimum Duration**: Audio clips shorter than ~400ms cannot be measured with LUFS
+4. **Silent Video**: Videos with completely silent audio are skipped
 
-This project includes a VBScript for batch exporting PowerPoint presentations to video files on Windows.
+---
+
+## Bonus: PowerPoint to Video Export (Windows)
+
+This toolkit includes a Windows VBScript for batch exporting PowerPoint presentations to video files, which complements the audio normalization workflow.
+
+### Typical Workflow
+
+1. **Normalize PPTX Audio**: Use `tune-pptx-sound` to normalize audio in your PowerPoint presentations
+2. **Export to Video**: Use `export_pptx_to_video.vbs` to convert PPTX files to MP4 videos
+3. **Fine-tune Video Audio** (optional): Use `tune-video-sound` if additional audio adjustments are needed
 
 ### Files
 
