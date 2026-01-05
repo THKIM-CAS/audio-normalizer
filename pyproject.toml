@@ -1,7 +1,7 @@
 [project]
 name = "audio-normalizer-toolkit"
 version = "0.1.0"
-description = "Normalize and denoise audio in PowerPoint presentations (PPTX) and videos (MP4) using LUFS standard"
+description = "Normalize and denoise audio in PowerPoint presentations (PPTX) and videos (MP4) using LUFS standard, with AI-powered transcription"
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT" }
@@ -29,11 +29,13 @@ dependencies = [
     "ffmpeg-python>=0.2.0",
     "scipy>=1.7.0",
     "noisereduce>=3.0.0",
+    "faster-whisper>=1.0.0",
 ]
 
 [project.scripts]
 tune-pptx-sound = "cli:main"
 tune-video-sound = "video_cli:main"
+pptx-transcript = "transcript_generator:main"
 
 [project.urls]
 Homepage = "https://github.com/THKIM-CAS/audio-normalizer"
@@ -47,8 +49,8 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["."]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "pytest>=7.0.0",
     "black>=23.0.0",
     "ruff>=0.1.0",

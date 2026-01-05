@@ -1,16 +1,17 @@
 # Audio Normalizer Toolkit
 
-A Python command-line toolkit for normalizing and denoising audio in both PowerPoint presentations (PPTX) and video files (MP4) using the LUFS (Loudness Units relative to Full Scale) standard.
+A Python command-line toolkit for normalizing and denoising audio in both PowerPoint presentations (PPTX) and video files (MP4) using the LUFS (Loudness Units relative to Full Scale) standard, plus AI-powered transcription of PPTX narrations.
 
 > **Note:** This is a modern uv-based Python project. All dependencies are managed with [uv](https://github.com/astral-sh/uv).
 
 ## What's Included
 
-This toolkit provides three complementary tools:
+This toolkit provides four complementary tools:
 
 1. **tune-pptx-sound** - PPTX audio normalizer and denoiser
 2. **tune-video-sound** - Video (MP4) audio normalizer and denoiser
-3. **export_pptx_to_video.vbs** - Windows batch script to export PPTX files to video
+3. **pptx-transcript** - Generate transcripts from PPTX narration audio using AI
+4. **export_pptx_to_video.vbs** - Windows batch script to export PPTX files to video
 
 ## Common Features
 
@@ -98,7 +99,7 @@ cd pptx_sound_normalizer
 uv sync
 
 # This creates a virtual environment and installs all dependencies
-# The tune-pptx-sound and tune-video-sound commands will be available
+# The tune-pptx-sound, tune-video-sound, and pptx-transcript commands will be available
 ```
 
 To run the tools after `uv sync`:
@@ -112,6 +113,7 @@ source .venv/bin/activate  # macOS/Linux
 # Then use the commands
 tune-pptx-sound input.pptx output.pptx
 tune-video-sound input.mp4 output.mp4
+pptx-transcript presentation.pptx
 ```
 
 Alternatively, run directly with uv:
@@ -119,6 +121,7 @@ Alternatively, run directly with uv:
 ```bash
 uv run tune-pptx-sound input.pptx output.pptx
 uv run tune-video-sound input.mp4 output.mp4
+uv run pptx-transcript presentation.pptx
 ```
 
 ### 3. Install FFmpeg
@@ -147,7 +150,7 @@ ffmpeg -version
 
 ## Usage
 
-After running `uv sync`, both `tune-pptx-sound` and `tune-video-sound` commands are available.
+After running `uv sync`, all three commands are available: `tune-pptx-sound`, `tune-video-sound`, and `pptx-transcript`.
 
 ---
 
@@ -476,6 +479,214 @@ ERROR: [Errno 13] Permission denied: 'output.pptx'
 - Ensure you have write permissions in the output directory
 - Close the output file if it's open in PowerPoint
 - Use a different output location
+
+---
+
+## pptx-transcript: Transcript Generator
+
+Generate text transcripts from PowerPoint narration audio using OpenAI's Whisper AI model for speech-to-text conversion.
+
+### Features
+
+- **AI-Powered Transcription**: Uses OpenAI's Whisper model for accurate speech-to-text
+- **Multiple Model Sizes**: Choose from tiny to large models based on accuracy/speed tradeoffs
+- **Multiple Output Formats**: Generate transcripts in TXT, JSON, or SRT (subtitle) format
+- **Slide-by-Slide Organization**: Transcripts are organized by slide number
+- **Batch Processing**: Process all PPTX files in a directory at once
+- **Language Detection**: Automatically detects the spoken language
+
+### Basic Usage
+
+Generate a transcript for a single PPTX file:
+
+```bash
+uv run pptx-transcript presentation.pptx
+```
+
+This creates `presentation_transcript.txt` with transcripts for all slide narrations.
+
+Or activate the virtual environment first:
+```bash
+source .venv/bin/activate  # macOS/Linux
+pptx-transcript presentation.pptx
+```
+
+### Output Formats
+
+**Text format (default):**
+```bash
+uv run pptx-transcript presentation.pptx -f txt
+```
+
+**JSON format:**
+```bash
+uv run pptx-transcript presentation.pptx -f json -o transcript.json
+```
+
+**SRT subtitle format:**
+```bash
+uv run pptx-transcript presentation.pptx -f srt -o transcript.srt
+```
+
+### Whisper Model Selection
+
+Choose a model based on your needs:
+
+```bash
+# Fast, less accurate (good for quick drafts)
+uv run pptx-transcript presentation.pptx -m tiny
+
+# Default - good balance of speed and accuracy
+uv run pptx-transcript presentation.pptx -m base
+
+# Better accuracy, slower
+uv run pptx-transcript presentation.pptx -m small
+
+# High accuracy
+uv run pptx-transcript presentation.pptx -m medium
+
+# Best accuracy, slowest
+uv run pptx-transcript presentation.pptx -m large
+```
+
+**Model comparison:**
+- `tiny` - Fastest, ~1GB VRAM, good for quick drafts
+- `base` - Default, ~1GB VRAM, good balance
+- `small` - ~2GB VRAM, better accuracy
+- `medium` - ~5GB VRAM, high accuracy
+- `large` - ~10GB VRAM, best accuracy
+
+### Batch Processing
+
+Process all PPTX files in a directory:
+
+```bash
+uv run pptx-transcript presentations/ -d transcripts/
+```
+
+This will generate transcripts for all PPTX files found in the `presentations/` directory and save them to `transcripts/`.
+
+### Custom Output Path
+
+Specify a custom output file:
+
+```bash
+uv run pptx-transcript presentation.pptx -o my_transcript.txt
+```
+
+### Verbose Output
+
+Enable detailed logging:
+
+```bash
+uv run pptx-transcript presentation.pptx -v
+```
+
+### Complete Example
+
+```bash
+uv run pptx-transcript \
+  presentation.pptx \
+  -o presentation_transcript.json \
+  -f json \
+  -m medium \
+  -v
+```
+
+### Output Format Examples
+
+**TXT Format:**
+```
+PowerPoint Narration Transcript
+==================================================
+
+Slide 1
+--------------------------------------------------
+Audio File: media1.m4a
+Language: english
+
+Transcript:
+Welcome to this presentation on audio normalization.
+
+==================================================
+
+Slide 2
+--------------------------------------------------
+Audio File: media2.m4a
+Language: english
+
+Transcript:
+Today we'll cover LUFS standards and best practices.
+
+==================================================
+```
+
+**JSON Format:**
+```json
+{
+  "slides": {
+    "1": {
+      "filename": "media1.m4a",
+      "text": "Welcome to this presentation on audio normalization.",
+      "language": "english",
+      "segments": [...]
+    },
+    "2": {
+      "filename": "media2.m4a",
+      "text": "Today we'll cover LUFS standards and best practices.",
+      "language": "english",
+      "segments": [...]
+    }
+  },
+  "total_slides": 2
+}
+```
+
+**SRT Format:**
+```
+1
+00:00:00,000 --> 00:00:05,000
+[Slide 1]
+
+2
+00:00:05,000 --> 00:00:10,500
+Welcome to this presentation on audio normalization.
+
+3
+00:00:00,000 --> 00:00:05,000
+[Slide 2]
+
+4
+00:00:05,000 --> 00:00:12,300
+Today we'll cover LUFS standards and best practices.
+```
+
+### Command-Line Options
+
+```
+positional arguments:
+  input                 Input PPTX file or directory containing PPTX files
+
+optional arguments:
+  -h, --help            Show help message and exit
+  -o, --output PATH     Output transcript file (for single file) or directory (for batch)
+  -d, --output-dir DIR  Output directory for batch processing
+  -m, --model MODEL     Whisper model size: tiny, base, small, medium, large (default: base)
+  -f, --format FORMAT   Output format: txt, json, srt (default: txt)
+  -v, --verbose         Enable verbose logging
+```
+
+### How It Works
+
+1. **Extraction**: PPTX file is extracted to access embedded audio files
+2. **Audio Discovery**: Finds all narration audio files in the presentation
+3. **AI Transcription**: Each audio file is transcribed using Whisper AI
+4. **Organization**: Transcripts are organized by slide number
+5. **Output**: Generates transcript file in the requested format
+
+### Requirements
+
+The transcript generator requires the `faster-whisper` package, which is included in the project dependencies. This is a faster, more efficient implementation of OpenAI's Whisper model that's fully compatible with Python 3.12. On first run, Whisper will download the selected model (file size varies by model).
 
 ---
 
